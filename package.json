@@ -1,0 +1,41 @@
+{
+  "name": "cyber-safe-bd-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "tsx src/scripts/seed.ts",
+    "survey:backfill": "tsx src/scripts/backfill-survey-answer-display.ts",
+    "survey:import-xlsx": "tsx src/scripts/import-cyber-survey-xlsx.ts",
+    "survey:remove-bengali-responses": "tsx src/scripts/remove-bengali-survey-responses.ts",
+    "laws:sync": "tsx src/scripts/sync-law-library.ts",
+    "crimes:sync": "tsx src/scripts/sync-crime-catalog.ts",
+    "support-resources:sync": "tsx src/scripts/sync-support-resources.ts",
+    "users:promote-faysal-admin": "tsx src/scripts/promote-faysal-admin.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/client": "^7.3.0",
+    "better-auth": "^1.4.17",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "xlsx": "^0.18.5",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.3.0",
+    "@types/pg": "^8.15.5",
+    "pathe": "^2.0.3",
+    "prisma": "^7.3.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}
