@@ -1,4 +1,4 @@
-import { ProfessionalRole } from "../../generated/prisma/enums.js";
+import { ProfessionalRole } from "@prisma/client";
 import { prisma } from "../../lib/prisma.js";
 import { parsePositiveInt } from "../../utils/api.js";
 

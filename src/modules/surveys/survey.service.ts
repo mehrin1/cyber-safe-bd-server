@@ -1,4 +1,4 @@
-import { SurveyQuestionType } from "../../generated/prisma/enums.js";
+import { SurveyQuestionType } from "@prisma/client";
 import { prisma } from "../../lib/prisma.js";
 import { cyberSafetySurvey } from "./survey.definition.js";
 

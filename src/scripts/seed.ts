@@ -7,7 +7,7 @@ import {
   LawRegion,
   MessageSender,
   ProfessionalRole,
-} from "../generated/prisma/enums.js";
+} from "@prisma/client";
 
 async function main() {
   await prisma.learnCategory.createMany({

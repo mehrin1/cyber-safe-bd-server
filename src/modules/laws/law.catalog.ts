@@ -1,4 +1,4 @@
-import { LawCategory, LawRegion, LawStatus } from "../../generated/prisma/enums.js";
+import { LawCategory, LawRegion, LawStatus } from "@prisma/client";
 
 export const lawCatalog = [
   {

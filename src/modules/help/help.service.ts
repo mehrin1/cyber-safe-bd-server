@@ -1,4 +1,4 @@
-import { HelpRequestStatus } from "../../generated/prisma/enums.js";
+import { HelpRequestStatus } from "@prisma/client";
 import { prisma } from "../../lib/prisma.js";
 
 type Actor = { id: string; role?: string | null };
