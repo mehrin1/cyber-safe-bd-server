@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc --noEmit",
+    "build": "prisma generate && tsc --noEmit",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:seed": "tsx src/scripts/seed.ts",
     "survey:backfill": "tsx src/scripts/backfill-survey-answer-display.ts",
     "survey:import-xlsx": "tsx src/scripts/import-cyber-survey-xlsx.ts",
