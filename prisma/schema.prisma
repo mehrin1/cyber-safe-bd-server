@@ -22,6 +22,9 @@ model User {
   helpRequests  HelpRequest[]
   sentMessages  HelpMessage[]
   surveyResponses SurveyResponse[]
+  communityPosts CommunityPost[]
+  communityLikes CommunityPostLike[]
+  communityComments CommunityComment[]
 }
 
 model Session {
@@ -220,6 +223,47 @@ model HelpMessage {
   sender        User?         @relation(fields: [senderId], references: [id], onDelete: SetNull)
 
   @@index([helpRequestId, createdAt])
+}
+
+model CommunityPost {
+  id        String               @id @default(uuid())
+  title     String
+  content   String               @db.Text
+  authorId  String
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  author    User                 @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes     CommunityPostLike[]
+  comments  CommunityComment[]
+
+  @@index([authorId, createdAt])
+  @@index([createdAt])
+}
+
+model CommunityPostLike {
+  id        String        @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime      @default(now())
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([userId, createdAt])
+}
+
+model CommunityComment {
+  id        String        @id @default(uuid())
+  postId    String
+  authorId  String
+  content   String        @db.Text
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([postId, createdAt])
+  @@index([authorId, createdAt])
 }
 
 model Survey {

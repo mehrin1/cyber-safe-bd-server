@@ -2,7 +2,7 @@ import { prisma } from "../../lib/prisma.js";
 
 export const dashboardService = {
   async getUserDashboard(userId: string) {
-    const [user, surveys, helpRequests, sentMessageCount] = await Promise.all([
+    const [user, surveys, helpRequests, sentMessageCount, communityPosts] = await Promise.all([
       prisma.user.findUniqueOrThrow({
         where: { id: userId },
         select: { name: true, email: true, image: true, role: true, createdAt: true },
@@ -20,9 +20,20 @@ export const dashboardService = {
         select: { id: true, title: true, category: true, status: true, updatedAt: true },
       }),
       prisma.helpMessage.count({ where: { senderId: userId } }),
+      prisma.communityPost.findMany({
+        where: { authorId: userId },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          title: true,
+          createdAt: true,
+          _count: { select: { likes: true, comments: true } },
+        },
+      }),
     ]);
 
-    return { profile: user, activity: { surveys, helpRequests, sentMessageCount } };
+    return { profile: user, activity: { surveys, helpRequests, sentMessageCount, communityPosts } };
   },
 
   async getAdminDashboard() {

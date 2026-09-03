@@ -54,3 +54,8 @@ Vercel serves the Express app through `api/index.ts`; local development still us
 - `GET /api/help-requests/:id/messages`
 - `POST /api/help-requests`
 - `POST /api/help-requests/:id/messages`
+- `GET /api/community/posts?search=&mine=&cursor=&limit=`
+- `POST /api/community/posts`
+- `POST /api/community/posts/:id/likes`
+- `GET /api/community/posts/:id/comments`
+- `POST /api/community/posts/:id/comments`

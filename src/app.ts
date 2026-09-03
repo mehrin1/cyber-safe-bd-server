@@ -12,6 +12,7 @@ import { requireAuth } from "./middlewares/auth.js";
 import { surveyRouter } from "./modules/surveys/survey.routes.js";
 import { crimeRouter } from "./modules/crimes/crime.routes.js";
 import { dashboardRouter } from "./modules/dashboard/dashboard.routes.js";
+import { communityRouter } from "./modules/community/community.routes.js";
 
 const app = express();
 const appURL = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
@@ -60,6 +61,7 @@ app.use("/api", helpRouter);
 app.use("/api", surveyRouter);
 app.use("/api", crimeRouter);
 app.use("/api", dashboardRouter);
+app.use("/api", communityRouter);
 app.use(notFound);
 app.use(errorHandler);
 
