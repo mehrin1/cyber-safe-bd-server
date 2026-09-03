@@ -1,4 +1,4 @@
-import { UserRole } from "../generated/prisma/enums.ts";
+import { UserRole } from "../generated/prisma/enums.js";
 import { prisma } from "../lib/prisma.js";
 
 const email = "faysalahmed915@gmail.com";
