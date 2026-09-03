@@ -14,10 +14,13 @@ import { crimeRouter } from "./modules/crimes/crime.routes.js";
 import { dashboardRouter } from "./modules/dashboard/dashboard.routes.js";
 
 const app = express();
+const appURL = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+
+app.set("trust proxy", 1);
 
 app.use(
   cors({
-    origin: process.env.APP_URL || "http://localhost:3000",
+    origin: appURL,
     credentials: true,
   }),
 );
