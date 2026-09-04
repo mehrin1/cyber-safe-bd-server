@@ -80,7 +80,10 @@ async function generateAnswer(history: { role: ChatMessageRole; content: string 
     },
   );
 
-  if (!response.ok) throw new Error(`CHAT_PROVIDER_ERROR:${response.status}`);
+  if (!response.ok) {
+    // Keep provider details out of the client response, but preserve the status for actionable server handling.
+    throw new Error(`CHAT_PROVIDER_ERROR:${response.status}`);
+  }
   const payload = await response.json() as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   const text = payload.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("").trim();
   if (!text) throw new Error("CHAT_PROVIDER_EMPTY_RESPONSE");
