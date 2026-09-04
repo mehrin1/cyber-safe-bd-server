@@ -18,6 +18,12 @@ type GeminiModelList = {
 const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite";
 const FALLBACK_GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
 
+function environmentValue(value: string | undefined) {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  return trimmed.replace(/^(?:"([\s\S]*)"|'([\s\S]*)')$/, "$1$2").trim();
+}
+
 function terms(value: string) {
   return new Set(value.toLowerCase().match(/[a-z0-9]{3,}/g) ?? []);
 }
@@ -62,7 +68,8 @@ async function retrieveKnowledge(query: string): Promise<ChatSource[]> {
 
 async function discoverGeminiModels(apiKey: string) {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
+    "https://generativelanguage.googleapis.com/v1beta/models",
+    { headers: { "x-goog-api-key": apiKey } },
   );
   if (!response.ok) return [];
 
@@ -73,10 +80,10 @@ async function discoverGeminiModels(apiKey: string) {
 }
 
 async function generateAnswer(history: { role: ChatMessageRole; content: string }[], sources: ChatSource[]) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = environmentValue(process.env.GEMINI_API_KEY);
   if (!apiKey) throw new Error("CHAT_PROVIDER_NOT_CONFIGURED");
 
-  const configuredModel = process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL;
+  const configuredModel = environmentValue(process.env.GEMINI_MODEL) || DEFAULT_GEMINI_MODEL;
   const models = [...new Set([configuredModel, DEFAULT_GEMINI_MODEL, ...FALLBACK_GEMINI_MODELS])];
   const context = sources.length
     ? sources.map((source, index) => `[${index + 1}] ${source.type}: ${source.title}\n${source.excerpt}`).join("\n\n")
@@ -88,10 +95,10 @@ async function generateAnswer(history: { role: ChatMessageRole; content: string 
     const model = models.shift()!;
     attemptedModels.add(model);
     response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
       {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({
         systemInstruction: {
           parts: [{ text: `You are CyberSafeBD's safety information assistant. Answer only from the retrieved project knowledge below. Cite factual claims as [1], [2], etc. If the answer is not in the knowledge, say so and suggest a relevant official support resource when available. Do not claim to be a lawyer, diagnose, request passwords or sensitive evidence, or give instructions for wrongdoing. For immediate danger, tell the user to contact local emergency services.\n\nRETRIEVED KNOWLEDGE:\n${context}` }],
