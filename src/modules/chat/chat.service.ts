@@ -11,6 +11,12 @@ export type ChatSource = {
 };
 
 type KnowledgeDocument = ChatSource & { searchable: string };
+type GeminiModelList = {
+  models?: Array<{ name?: string; supportedGenerationMethods?: string[] }>;
+};
+
+const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite";
+const FALLBACK_GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
 
 function terms(value: string) {
   return new Set(value.toLowerCase().match(/[a-z0-9]{3,}/g) ?? []);
@@ -54,17 +60,33 @@ async function retrieveKnowledge(query: string): Promise<ChatSource[]> {
   return rankDocuments(query, documents);
 }
 
+async function discoverGeminiModels(apiKey: string) {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
+  );
+  if (!response.ok) return [];
+
+  const payload = await response.json() as GeminiModelList;
+  return (payload.models ?? [])
+    .filter((model) => model.name?.startsWith("models/gemini-") && model.supportedGenerationMethods?.includes("generateContent"))
+    .map((model) => model.name!.replace(/^models\//, ""));
+}
+
 async function generateAnswer(history: { role: ChatMessageRole; content: string }[], sources: ChatSource[]) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("CHAT_PROVIDER_NOT_CONFIGURED");
 
-  const configuredModel = process.env.GEMINI_MODEL?.trim();
-  const models = [...new Set([configuredModel, "gemini-2.5-flash-lite", "gemini-2.5-flash"].filter(Boolean))] as string[];
+  const configuredModel = process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL;
+  const models = [...new Set([configuredModel, DEFAULT_GEMINI_MODEL, ...FALLBACK_GEMINI_MODELS])];
   const context = sources.length
     ? sources.map((source, index) => `[${index + 1}] ${source.type}: ${source.title}\n${source.excerpt}`).join("\n\n")
     : "No matching project knowledge was retrieved.";
   let response: Response | undefined;
-  for (const model of models) {
+  let attemptedDiscovery = false;
+  const attemptedModels = new Set<string>();
+  while (models.length) {
+    const model = models.shift()!;
+    attemptedModels.add(model);
     response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
       {
@@ -83,6 +105,14 @@ async function generateAnswer(history: { role: ChatMessageRole; content: string 
       },
     );
     if (response.status !== 404) break;
+
+    // API keys can expose a different subset of Gemini models than the public defaults.
+    // Query the key's catalog once, then retry any compatible models it reports.
+    if (!models.length && !attemptedDiscovery) {
+      attemptedDiscovery = true;
+      const discoveredModels = await discoverGeminiModels(apiKey);
+      models.push(...discoveredModels.filter((candidate) => !attemptedModels.has(candidate)));
+    }
   }
 
   if (!response || !response.ok) {
