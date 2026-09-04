@@ -58,13 +58,16 @@ async function generateAnswer(history: { role: ChatMessageRole; content: string 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("CHAT_PROVIDER_NOT_CONFIGURED");
 
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+  const configuredModel = process.env.GEMINI_MODEL?.trim();
+  const models = [...new Set([configuredModel, "gemini-2.5-flash-lite", "gemini-2.5-flash"].filter(Boolean))] as string[];
   const context = sources.length
     ? sources.map((source, index) => `[${index + 1}] ${source.type}: ${source.title}\n${source.excerpt}`).join("\n\n")
     : "No matching project knowledge was retrieved.";
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
-    {
+  let response: Response | undefined;
+  for (const model of models) {
+    response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
+      {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -77,12 +80,14 @@ async function generateAnswer(history: { role: ChatMessageRole; content: string 
         })),
         generationConfig: { temperature: 0.2, maxOutputTokens: 700 },
       }),
-    },
-  );
+      },
+    );
+    if (response.status !== 404) break;
+  }
 
-  if (!response.ok) {
+  if (!response || !response.ok) {
     // Keep provider details out of the client response, but preserve the status for actionable server handling.
-    throw new Error(`CHAT_PROVIDER_ERROR:${response.status}`);
+    throw new Error(`CHAT_PROVIDER_ERROR:${response?.status ?? "UNKNOWN"}`);
   }
   const payload = await response.json() as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   const text = payload.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("").trim();
