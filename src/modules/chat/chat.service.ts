@@ -15,8 +15,8 @@ type GeminiModelList = {
   models?: Array<{ name?: string; supportedGenerationMethods?: string[] }>;
 };
 
-const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite";
-const FALLBACK_GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
+const DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-lite";
+const FALLBACK_GEMINI_MODELS = ["gemini-3.5-flash", "gemini-flash-lite-latest"];
 
 function environmentValue(value: string | undefined) {
   const trimmed = value?.trim();

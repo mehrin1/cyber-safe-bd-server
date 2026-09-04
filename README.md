@@ -32,7 +32,7 @@ Backend scaffold for the `cyber-crime-bd` client application.
 
 1. Import this repository into Vercel with the project root as the Root Directory.
 2. Add `DATABASE_URL`, `BETTER_AUTH_SECRET`, and `APP_URL` in the Vercel project environment variables. Add the Google variables if Google sign-in is enabled.
-3. To enable the retrieval-augmented chat assistant, add `GEMINI_API_KEY` and optionally `GEMINI_MODEL=gemini-2.5-flash-lite`. The key is used only by the server and must not be exposed as a `NEXT_PUBLIC_*` variable.
+3. To enable the retrieval-augmented chat assistant, add `GEMINI_API_KEY` and optionally `GEMINI_MODEL=gemini-3.5-flash-lite`. The key is used only by the server and must not be exposed as a `NEXT_PUBLIC_*` variable.
 4. Deploy with the default build command: `npm run build`. This command applies pending Prisma migrations before building.
 
 Vercel serves the Express app through `api/index.ts`; local development still uses `npm run dev`.
